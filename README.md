@@ -25,10 +25,16 @@ otherwise; **Super+A** brings it out. It is one size whatever it says:
     kitty in documents"), and it shows a shell command it proposes exactly as
     it will run, with **Run** and **In terminal**: nothing runs without that
     click.
+  - what a command found, as a list under its answer: Safe's logins ("copy
+    my GitHub password" when several fit: a click copies that one), files
+    and folders ("find my resume": **Open**, and small buttons for **Show in
+    folder**, **Copy path**, **Open terminal here**), ewe browser's history
+    and tabs (**Open**, **Go to**). A locked Safe gets an **Unlock Safe**
+    button that opens Safe's own window for the master password.
 
 | kind | file | what |
 |---|---|---|
-| service | `Service.qml` | the daemon's socket (reconnects, starts the daemon on demand), `env`, `settings`, `do` (what only the shell can do), the blur rule, IPC `ewe.companion` |
+| service | `Service.qml` | the daemon's socket (reconnects, starts the daemon on demand), `env`, `settings`, `do` (what only the shell can do: also ewe browser's command line and Safe's unlock prompt), the blur rule, IPC `ewe.companion` |
 | overlay | `Drop.qml`, `Indicator.qml`, `cards/`, `sections/` | the notch on each screen and everything in it |
 | — | `CompanionState.qml` | the plugin's singleton: what they share |
 
@@ -76,16 +82,35 @@ keyring.
   bar in the right margin, while the line you type in stays pinned at the
   bottom. A new answer scrolls itself into view; a new card scrolls to the
   top.
+- **It never sees a password.** Safe copies it and clears the clipboard
+  itself; the notch shows a login's title and username only, and *Copy
+  path* is the one thing it puts on the clipboard itself (`wl-copy`).
+- **ewe browser's acts run here** (search, open, play, a tab), as
+  `ewe-browser` with arguments, never a shell, so a browser they start
+  belongs to your desktop. The notch closes first, as it does for apps.
 - **It needs the `ewe-companion` package** (`ewe-companiond`). Without it
   the dot stays dim, and hovering says *Companion is off*.
 - **The notch covers a strip at the top centre of the window under it**,
   like a phone's notch. A fullscreen window covers the notch.
 - **It runs unsandboxed, like every plugin.**
 
-## Test
+## Develop and test
 
-Use ewe's nested harness with a debug daemon; the full recipe is in the
-ewe-companion README. The shots in development come from `driver.sh shot`
-with `ewe-companion debug card permission|question|note`.
+Working on it (people and agents): [`AGENTS.md`](AGENTS.md) here, and
+[`ewe-companion/AGENTS.md`](https://github.com/prj786/ewe-companion/blob/main/AGENTS.md)
+for the whole picture. To see a change without installing anything, use the
+companion's island harness: a debug daemon and this plugin in ewe's nested
+shell, with a virtual mouse.
+
+```sh
+cd ../ewe-companion
+tests/island.sh up --scale 1.8
+tests/island.sh ctl debug card permission     # or question / note
+tests/island.sh shot card
+tests/island.sh sync                          # after editing the QML here
+tests/island.sh down
+```
+
+The rest is in `ewe-companion/docs/TESTING.md`.
 
 MIT licence.
