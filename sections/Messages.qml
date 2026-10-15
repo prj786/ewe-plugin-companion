@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs
 import ".."
 
@@ -12,6 +13,13 @@ import ".."
 // `$ command`) shows exactly as it will run, with Run and In terminal;
 // nothing runs without that click, and a risky one says why in warning ink
 // with a danger-styled Run.
+//
+// What a command found comes as rows under its line (Safe's logins, files
+// and folders, the browser's history and tabs): a click on a row does its
+// first action (Copy password, Open, Go to); the small buttons at its right
+// do the others (Show in folder, Copy path, Open terminal here). Titles and
+// usernames from Safe are shown here only: the daemon keeps them out of
+// what a model sees.
 Column {
     id: ch
     spacing: Theme.spaceS
@@ -31,6 +39,7 @@ Column {
             readonly property var confirm: !msg.mine && msg.modelData.confirm ? msg.modelData.confirm : null
             readonly property bool sent: !!msg.modelData.sent
             readonly property string output: !msg.mine && msg.modelData.output ? msg.modelData.output : ""
+            readonly property var rows: !msg.mine && msg.modelData.rows ? msg.modelData.rows : []
             readonly property int headH: Math.max(body.implicitHeight, undo.visible ? undo.height : 0)
             width: ch.width
             height: msg.headH + (extras.visible ? extras.implicitHeight + Theme.spaceXs : 0)
@@ -59,7 +68,38 @@ Column {
                 y: msg.headH + Theme.spaceXs
                 width: parent.width
                 spacing: Theme.spaceXs
-                visible: msg.action !== null || msg.confirm !== null || msg.output !== ""
+                visible: msg.action !== null || msg.confirm !== null || msg.output !== "" || msg.rows.length > 0
+
+                // what it found: one row each, its first action on a click
+                ListWell {
+                    visible: msg.rows.length > 0
+                    width: parent.width
+                    Repeater {
+                        model: msg.rows
+                        ListRow {
+                            id: found
+                            required property var modelData
+                            readonly property var acts: modelData.actions || []
+                            width: parent.width
+                            density: "dense"
+                            glyph: ch.glyphOf(modelData.icon)
+                            label: modelData.title || ""
+                            desc: modelData.detail || ""
+                            kind: found.acts.length > 0 ? found.acts[0].label : ""
+                            disabled: found.acts.length === 0
+                            onClicked: ch.act(found.acts[0])
+                            Repeater {
+                                model: found.acts.slice(1)
+                                QsIconButton {
+                                    required property var modelData
+                                    ic: ch.glyphOf(ch.iconOf(modelData))
+                                    Accessible.name: modelData.label
+                                    onGo: ch.act(modelData)
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // what a command printed, or the command on offer
                 Rectangle {
@@ -119,6 +159,31 @@ Column {
             }
         }
     }
+    // a row's action: a catalog command through the daemon, or a path to
+    // copy (that one never leaves the island)
+    function act(a) {
+        if (!a) return
+        if (a.copy !== undefined) Quickshell.execDetached(["wl-copy", "--", String(a.copy)])
+        else CompanionState.run(a.command, a.args)
+    }
+    function iconOf(a) {
+        return a.copy !== undefined ? "copy"
+             : a.command === "open_folder" ? "folder"
+             : a.command === "launch_app" ? "terminal"
+             : a.command === "open_url" ? "web" : ""
+    }
+    function glyphOf(name) {
+        switch (name) {
+        case "folder": return Theme.icFolder
+        case "file": return Theme.icFile
+        case "web": return Theme.icWeb
+        case "key": return Theme.icLock
+        case "copy": return Theme.icClipboard
+        case "terminal": return Theme.icSsh
+        default: return Theme.icChevronRight
+        }
+    }
+
     Row {
         visible: CompanionState.thinking
         spacing: Theme.spaceS

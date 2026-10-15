@@ -10,9 +10,11 @@ import qs
 // mirrors its state into CompanionState for the notch to draw, and sends
 // back what only the shell knows or can do:
 //
-//   env       locked, Do not disturb, the compositor's signature
+//   env       locked, Do not disturb, the compositor's signature, the
+//             Wayland display (for what Safe copies)
 //   settings  who answers questions (the plugin's options; never a key)
-//   do        Do not disturb, opening apps, screenshots, the browser: the
+//   do        Do not disturb, opening apps, screenshots, the browser (its
+//             own command line when it has one), Safe's unlock prompt: the
 //             things a daemon outside the shell should not do itself
 //
 // The daemon outlives shell restarts on purpose: an agent waiting on a card
@@ -138,7 +140,8 @@ Scope {
             if (m.kind === "thinking") { CompanionState.thinking = true; break }
             CompanionState.thinking = false
             CompanionState.addMessage({ id: m.id, who: "companion", kind: m.kind, text: m.text || "", undo: m.undo || "",
-                                        action: m.action || null, confirm: m.confirm || null, output: m.output || "" })
+                                        action: m.action || null, confirm: m.confirm || null, output: m.output || "",
+                                        rows: m.rows || [] })
             // a command run from a button or a keybind, with the drop shut,
             // still says what it did
             if (!CompanionState.dropOpen && m.text)
@@ -157,7 +160,8 @@ Scope {
             type: "env",
             locked: Shell.locked,
             dnd: Shell.dnd,
-            hypr: Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") || ""
+            hypr: Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") || "",
+            wayland: Quickshell.env("WAYLAND_DISPLAY") || ""
         })
     }
     function sendSettings() {
@@ -228,6 +232,27 @@ Scope {
             browser.reqId = id
             browser.running = true
             CompanionState.dropOpen = false
+            break
+        case "browser":
+            // ewe browser's own command line (its docs/CLI.md): open,
+            // search, play, a tab. Run here, not by the daemon, because it
+            // may start the browser, which then belongs to the desktop. Only
+            // ewe-browser, only as argv
+            if (String(a.bin || "").split("/").pop() !== "ewe-browser") { root.done(id, false, "Not ewe browser."); break }
+            if (bcli.running) { root.done(id, false, "ewe browser is busy."); break }
+            bcli.reqId = id
+            bcli.command = [String(a.bin)].concat((a.args || []).map(String))
+            bcli.running = true
+            bcliTimeout.restart()
+            CompanionState.dropOpen = false
+            break
+        case "safe_unlock":
+            // Safe's own prompt (`ewe-safe unlock --ask`): the master
+            // password is typed there, never into the companion
+            if (String(a.bin || "").split("/").pop() !== "ewe-safe") { root.done(id, false, "Not Safe."); break }
+            CompanionState.dropOpen = false
+            Quickshell.execDetached([String(a.bin), "unlock", "--ask"])
+            root.done(id, true)
             break
         default:
             root.done(id, false, "The island cannot do " + action + ".")
@@ -314,6 +339,29 @@ Scope {
         stdout: StdioCollector { id: via }
         onExited: (code) => root.done(browser.reqId, code === 0, code === 0 ? "" : "Could not open the browser.",
                                       { via: via.text.trim() })
+    }
+
+    // ewe browser's command line: one JSON object on its last line, which
+    // goes back to the daemon as is (it reads `ok`, the line, the undo)
+    Process {
+        id: bcli
+        property string reqId: ""
+        stdout: StdioCollector { id: bout }
+        onExited: (code) => {
+            bcliTimeout.stop()
+            var lines = bout.text.split("\n").filter(function (l) { return l.trim() !== "" })
+            var reply = null
+            try { reply = JSON.parse(lines[lines.length - 1]) } catch (e) {}
+            if (reply) root.done(bcli.reqId, true, "", { reply: reply })
+            else root.done(bcli.reqId, false, "ewe browser did not answer.")
+        }
+    }
+    // the daemon waits 20 s (its browser.rs ACT); a command line that hangs
+    // is stopped after that. A process deadline, not a motion: no token
+    Timer {
+        id: bcliTimeout
+        interval: 25000
+        onTriggered: bcli.running = false
     }
 
     // ── reconnect, starting the daemon when nobody answers ────────────────
