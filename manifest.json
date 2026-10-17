@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "ewe.companion",
-  "name": "Companion",
-  "version": "0.3.0",
+  "name": "Shaun",
+  "version": "0.4.0",
   "apiVersion": 3,
-  "description": "A notch under the top bar: what your AI agents are doing, their requests to approve, a glance at what needs you, quick actions and a small chat for questions and commands, with Safe, ewe browser and your files.",
+  "description": "Shaun, your desktop companion: a notch under the top bar with what your AI agents are doing, their requests to approve, a glance at what needs you, quick actions and a small chat for questions and commands, with Safe, ewe browser and your files.",
   "homepage": "https://github.com/prj786/ewe-plugin-companion",
   "author": "prj786",
   "icon": "icMessage",

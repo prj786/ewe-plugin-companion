@@ -394,10 +394,18 @@ Scope {
     // own namespace the same rule at runtime, again after every config
     // reload; nothing on disk changes, and with EWE_NO_BLUR (glassBlur
     // false) it adds nothing.
+    //
+    // xray: the bar sits on the wallpaper (its exclusive zone keeps windows
+    // out), the notch hangs over windows. A plain blur showed the window
+    // under the notch through the bar's ground, so the notch never matched
+    // the bar: a shade darker over a terminal, grey over a light page,
+    // worst in light mode (owner, 2026-10-17). With xray the notch blurs the
+    // wallpaper, as the bar does, and the two are one material. (xray needs
+    // decoration.blur.new_optimizations, which ewe turns on with the blur.)
     function applyBlur() {
         if (!Theme.glassBlur) return
         Quickshell.execDetached(["hyprctl", "eval",
-            'hl.layer_rule({ name = "ewe-companion-blur", match = { namespace = "^quickshell:companion$" }, blur = true, ignore_alpha = 0.05 })'])
+            'hl.layer_rule({ name = "ewe-companion-blur", match = { namespace = "^quickshell:companion$" }, blur = true, ignore_alpha = 0.05, xray = true })'])
     }
     Connections {
         target: Hyprland

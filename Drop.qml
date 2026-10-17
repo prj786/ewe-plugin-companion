@@ -213,55 +213,75 @@ Scope {
             // The rule runs along the bar's lower edge, bends down the fillet,
             // round the notch and back up into the bar. The curve renderer
             // draws it analytically, so it stays smooth at any scale.
-            Shape {
-                id: ground
-                anchors.fill: parent
+            //
+            // The bar's material, the same as the bar's own: the bar's ground
+            // at the bar's opacity over the blurred wallpaper (the blur rule
+            // is xray, Service.applyBlur), so whatever window sits under the
+            // notch never shows through (owner, 2026-10-17: "background
+            // should always be same as topbars").
+            //
+            // It is clipped at the bar's edge. The ground starts above it and
+            // the clip cuts it on a whole device pixel, where the bar's own
+            // ground ends: started at the edge, the anti-aliased top row
+            // showed the bar's rule as a hairline (2026-10-14); left inside
+            // the bar, that half-covered row got the whole xray blur under it
+            // and drew a seam, darker in light mode, lighter in dark (bar
+            // 40 px at 1.8, 2026-10-17). A clip is a scissor: a hard edge.
+            Item {
+                y: win.barH
+                width: parent.width
+                height: Math.max(0, parent.height - win.barH)
+                clip: true
                 visible: notch.height > 0
-                preferredRendererType: Shape.CurveRenderer
-                readonly property real lw: Theme.borderWidth1
-                // the corners grow with the notch as it comes out of the bar
-                readonly property real k: Math.max(0, Math.min(1, (notch.height - lw) / Math.max(1, win.fil + win.corner)))
-                readonly property real f: win.fil * k
-                readonly property real c: win.corner * k
-                readonly property real x0: notch.x
-                readonly property real x1: notch.x + notch.width
-                readonly property real y0: win.barH               // the bar's lower edge
-                readonly property real yr: win.barH + lw / 2      // its rule's centre line
-                readonly property real y1: win.barH + notch.height
+                Shape {
+                    id: ground
+                    y: -win.barH
+                    width: win.width
+                    height: win.height
+                    preferredRendererType: Shape.CurveRenderer
+                    readonly property real lw: Theme.borderWidth1
+                    // the corners grow with the notch as it comes out of the bar
+                    readonly property real k: Math.max(0, Math.min(1, (notch.height - lw) / Math.max(1, win.fil + win.corner)))
+                    readonly property real f: win.fil * k
+                    readonly property real c: win.corner * k
+                    readonly property real x0: notch.x
+                    readonly property real x1: notch.x + notch.width
+                    readonly property real y0: win.barH               // the bar's lower edge
+                    readonly property real yr: win.barH + lw / 2      // its rule's centre line
+                    readonly property real y1: win.barH + notch.height
 
-                // the ground starts one rule above the bar's edge, so its
-                // anti-aliased top falls on the bar's own ground: started at
-                // the edge, it showed the bar's rule as a light hairline
-                // across the notch (owner's laptop at 1.8, 2026-10-14)
-                ShapePath {
-                    strokeColor: "transparent"
-                    fillColor: Theme.barGround
-                    startX: ground.x0 - ground.f; startY: ground.y0 - ground.lw
-                    PathLine { x: ground.x0 - ground.f; y: ground.yr }
-                    PathArc { x: ground.x0; y: ground.yr + ground.f; radiusX: ground.f; radiusY: ground.f }
-                    PathLine { x: ground.x0; y: ground.y1 - ground.c }
-                    PathArc { x: ground.x0 + ground.c; y: ground.y1; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
-                    PathLine { x: ground.x1 - ground.c; y: ground.y1 }
-                    PathArc { x: ground.x1; y: ground.y1 - ground.c; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
-                    PathLine { x: ground.x1; y: ground.yr + ground.f }
-                    PathArc { x: ground.x1 + ground.f; y: ground.yr; radiusX: ground.f; radiusY: ground.f }
-                    PathLine { x: ground.x1 + ground.f; y: ground.y0 - ground.lw }
-                    PathLine { x: ground.x0 - ground.f; y: ground.y0 - ground.lw }
-                }
-                ShapePath {
-                    fillColor: "transparent"
-                    strokeColor: Theme.barOutline
-                    strokeWidth: ground.lw
-                    capStyle: ShapePath.FlatCap
-                    joinStyle: ShapePath.RoundJoin
-                    startX: ground.x0 - ground.f; startY: ground.yr
-                    PathArc { x: ground.x0; y: ground.yr + ground.f; radiusX: ground.f; radiusY: ground.f }
-                    PathLine { x: ground.x0; y: ground.y1 - ground.c }
-                    PathArc { x: ground.x0 + ground.c; y: ground.y1; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
-                    PathLine { x: ground.x1 - ground.c; y: ground.y1 }
-                    PathArc { x: ground.x1; y: ground.y1 - ground.c; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
-                    PathLine { x: ground.x1; y: ground.yr + ground.f }
-                    PathArc { x: ground.x1 + ground.f; y: ground.yr; radiusX: ground.f; radiusY: ground.f }
+                    // the ground starts one rule above the bar's edge, for the
+                    // clip to cut (above)
+                    ShapePath {
+                        strokeColor: "transparent"
+                        fillColor: Theme.barGround
+                        startX: ground.x0 - ground.f; startY: ground.y0 - ground.lw
+                        PathLine { x: ground.x0 - ground.f; y: ground.yr }
+                        PathArc { x: ground.x0; y: ground.yr + ground.f; radiusX: ground.f; radiusY: ground.f }
+                        PathLine { x: ground.x0; y: ground.y1 - ground.c }
+                        PathArc { x: ground.x0 + ground.c; y: ground.y1; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
+                        PathLine { x: ground.x1 - ground.c; y: ground.y1 }
+                        PathArc { x: ground.x1; y: ground.y1 - ground.c; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
+                        PathLine { x: ground.x1; y: ground.yr + ground.f }
+                        PathArc { x: ground.x1 + ground.f; y: ground.yr; radiusX: ground.f; radiusY: ground.f }
+                        PathLine { x: ground.x1 + ground.f; y: ground.y0 - ground.lw }
+                        PathLine { x: ground.x0 - ground.f; y: ground.y0 - ground.lw }
+                    }
+                    ShapePath {
+                        fillColor: "transparent"
+                        strokeColor: Theme.barOutline
+                        strokeWidth: ground.lw
+                        capStyle: ShapePath.FlatCap
+                        joinStyle: ShapePath.RoundJoin
+                        startX: ground.x0 - ground.f; startY: ground.yr
+                        PathArc { x: ground.x0; y: ground.yr + ground.f; radiusX: ground.f; radiusY: ground.f }
+                        PathLine { x: ground.x0; y: ground.y1 - ground.c }
+                        PathArc { x: ground.x0 + ground.c; y: ground.y1; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
+                        PathLine { x: ground.x1 - ground.c; y: ground.y1 }
+                        PathArc { x: ground.x1; y: ground.y1 - ground.c; radiusX: ground.c; radiusY: ground.c; direction: PathArc.Counterclockwise }
+                        PathLine { x: ground.x1; y: ground.yr + ground.f }
+                        PathArc { x: ground.x1 + ground.f; y: ground.yr; radiusX: ground.f; radiusY: ground.f }
+                    }
                 }
             }
 

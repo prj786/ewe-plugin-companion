@@ -16,13 +16,17 @@ what is particular to the QML.
 
 ## What this is
 
-A notch of the bar's own material hanging from the top bar's centre. It is
+**Shaun** (the user-facing name since 2026-10-17; every id stays
+`companion`: the plugin `ewe.companion`, its IPC target, the namespace
+`quickshell:companion`, the package): a notch of the bar's own material
+hanging from the top bar's centre. It is
 out while something runs (an agent at work or waiting, a card, a line to
 say, a question in flight, game mode) and gone otherwise; Super+A or a click
-opens the home panel. Version **0.2.0**, Plugin API 3, not bundled with ewe
-yet (P7). User-facing description and honest limits: `README.md`. 0.3.0
-(2026-10-15, P2.9) adds rows under answers and the `browser` and
-`safe_unlock` do actions.
+opens the home panel. Version **0.4.0**, Plugin API 3, bundled with ewe
+from 0.29.0-beta (opt-in: `default` and `migrate` false). User-facing
+description and honest limits: `README.md`. 0.3.0 (2026-10-15, P2.9) added
+rows under answers and the `browser` and `safe_unlock` do actions; 0.4.0
+(2026-10-17) is Shaun and the bar's material (xray blur, the clip).
 
 ## Files
 
@@ -131,12 +135,20 @@ The house rules hold (`../ewe-companion/AGENTS.md`); these bite most here:
   when an exclusive layer takes the keyboard.
 - **The material is one `Shape`** with the curve renderer: the ground and the
   bar's rule as `ShapePath`s, fillets into the bar included, so the joint is
-  smooth at any scale. The fill starts one rule-width above the bar's edge
-  to hide the hairline. The shell's `InvertedCorner` paints nothing (its arc
+  smooth at any scale. The fill starts one rule-width above the bar's edge,
+  for the clip below to cut. The shell's `InvertedCorner` paints nothing (its arc
   runs the long way round): do not reach for it.
 - **Blur** comes from a runtime layer rule for `quickshell:companion`
   (`Service.applyBlur`), re-added after every `configreloaded`, only when
-  Glass blur is on.
+  Glass blur is on. It is **xray**: the bar sits on the wallpaper, the
+  notch over windows, so a plain blur let the window under the notch show
+  through the bar's ground and the two never matched. With xray both blur
+  the wallpaper and are one material.
+- **The material is clipped at the bar's edge** (the `Item` round
+  `ground`): the fill starts above the edge and the clip, a scissor, cuts it
+  on the whole device pixel where the bar's own ground ends. Any
+  half-covered row over the bar gets the whole xray blur under it and shows
+  as a seam.
 - **The open notch stops at 60 % of the screen** (`maxOpenH`). The cards,
   sections and messages scroll in `scroller`; the chat line is pinned in
   `dock`. New messages scroll into view (`followEnd`, `scrollToEnd`); a new
@@ -195,6 +207,21 @@ The house rules hold (`../ewe-companion/AGENTS.md`); these bite most here:
   Appearance; the daemon's reply names the page to pick.
 - **The headless harness has no pointer.** Hover and click bugs never show
   without the virtual mouse (`tests/island.sh hover`).
+- **The notch looked different from the bar** (owner, 2026-10-17: darker
+  in dark mode, worse in light): the plain blur showed the window under the
+  notch. Fixed by the xray rule. Measure it, do not eyeball it: put a
+  light window under the notch (`driver.sh spawn kitty -o
+  background=#f4f4f4`) and compare the bar's pixel with the notch's in the
+  shot. The harness has no `user.lua`, so give the bar its blur by hand
+  first (`driver.sh hc eval 'hl.layer_rule({ name = "ewe-bar-blur", match
+  = { namespace = "^quickshell:(bar|dock)$" }, blur = true, ignore_alpha =
+  0.05 })'`), or the bar is unblurred and a level off.
+- **A half-covered row of the notch's fill over the bar draws a seam**
+  with xray (darker in light mode, lighter in dark). Moving the path's top
+  onto a device pixel changed nothing in the shots; the clip at the bar's
+  edge removed it, at the 40 px bar and at the 36 px one (64.8 device px).
+  Re-registering a named layer rule without `xray` keeps the old `xray =
+  true`: restart the nested Hyprland to see the old look.
 - **Bugs that only show at the owner's 1.8 scale** (pixelated curves, off
   by one rows): test with `tests/island.sh up --scale 1.8`.
 
