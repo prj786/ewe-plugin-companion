@@ -31,13 +31,13 @@ Item {
                                   : CompanionState.gameMode ? "game"
                                   : "idle"
     readonly property string word: ind.peek ? ind.peek.line
-                                  : ind.mood === "off" ? "Companion is off"
+                                  : ind.mood === "off" ? "Shaun is off"
                                   : ind.mood === "waiting" ? "Needs you"
                                   : ind.mood === "working" ? "Working"
                                   : ind.mood === "thinking" ? "Thinking"
                                   : ind.mood === "error" ? "Stopped"
                                   : ind.mood === "game" ? "Game mode"
-                                  : "Companion"
+                                  : "Shaun"
     readonly property color ink: ind.peek ? (ind.peek.level === "success" ? Theme.success
                                            : ind.peek.level === "danger" ? Theme.danger
                                            : ind.peek.level === "warning" ? Theme.warning : Theme.accent)

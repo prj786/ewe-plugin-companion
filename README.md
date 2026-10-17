@@ -1,6 +1,6 @@
 # ewe.companion
 
-The notch under ewe's top bar: the shell half of
+**Shaun**, the notch under ewe's top bar: the shell half of
 [ewe-companion](https://github.com/prj786/ewe-companion) (RFC-007). A tab of
 the bar's own glass hangs from the bar's centre while something runs (an
 agent at work, a card, a line to say, a question, game mode), and is gone
@@ -41,7 +41,7 @@ otherwise; **Super+A** brings it out. It is one size whatever it says:
 IPC (`qs ipc call ewe.companion …`): `toggle` · `open` · `hide` · `status` ·
 `ask <text>`.
 
-**Settings** (Komble → Plugins → Options):
+**Settings** (Komble → Plugins → Shaun → Options):
 
 | setting | default | what |
 |---|---|---|
@@ -89,7 +89,12 @@ keyring.
   `ewe-browser` with arguments, never a shell, so a browser they start
   belongs to your desktop. The notch closes first, as it does for apps.
 - **It needs the `ewe-companion` package** (`ewe-companiond`). Without it
-  the dot stays dim, and hovering says *Companion is off*.
+  the dot stays dim, and hovering says *Shaun is off*.
+- **The notch is the bar's own material.** With Glass on it blurs the
+  wallpaper behind it, as the bar does (a Hyprland `xray` blur rule), so a
+  window under the notch never shows through it. Without compositor blur
+  (`EWE_NO_BLUR`: VMs, NVIDIA; or a bar under 10 % opacity) the window under
+  it shows faintly through the glass.
 - **The notch covers a strip at the top centre of the window under it**,
   like a phone's notch. A fullscreen window covers the notch.
 - **It runs unsandboxed, like every plugin.**
