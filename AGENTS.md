@@ -22,11 +22,13 @@ what is particular to the QML.
 hanging from the top bar's centre. It is
 out while something runs (an agent at work or waiting, a card, a line to
 say, a question in flight, game mode) and gone otherwise; Super+A or a click
-opens the home panel. Version **0.4.0**, Plugin API 3, bundled with ewe
+opens the home panel. Version **0.5.0**, Plugin API 3, bundled with ewe
 from 0.29.0-beta (opt-in: `default` and `migrate` false). User-facing
 description and honest limits: `README.md`. 0.3.0 (2026-10-15, P2.9) added
 rows under answers and the `browser` and `safe_unlock` do actions; 0.4.0
-(2026-10-17) is Shaun and the bar's material (xray blur, the clip).
+(2026-10-17) is Shaun and the bar's material (xray blur, the clip); 0.5.0
+(2026-10-18, wave 2) adds row icons for downloads, workspaces, timers and
+Bluetooth devices.
 
 ## Files
 
