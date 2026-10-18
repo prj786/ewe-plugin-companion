@@ -60,7 +60,10 @@ sections/Actions.qml       quick actions: Do not disturb, game mode, screenshot,
 sections/Messages.qml      the conversation: answers, Undo, Open buttons, proposed commands (Run /
                            In terminal), their output, and rows (a ListWell of ListRows: a click
                            does the first action, small icon buttons the others; `copy` actions
-                           stay in the island: wl-copy)
+                           stay in the island: wl-copy). glyphOf maps a row's `icon` (folder, file,
+                           web, key; wave 2: download, workspace, timer, bluetooth) to a Theme.ic*
+                           glyph, iconOf a secondary button's command (Show in folder → folder,
+                           Cancel → close); an unknown one is a chevron
 sections/Chat.qml          the line you type in, the provider hint, the API key field
 sections/SectionLabel.qml  the overline above a section
 README.md              what it does, settings, honest limits
