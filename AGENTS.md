@@ -22,11 +22,13 @@ what is particular to the QML.
 hanging from the top bar's centre. It is
 out while something runs (an agent at work or waiting, a card, a line to
 say, a question in flight, game mode) and gone otherwise; Super+A or a click
-opens the home panel. Version **0.4.0**, Plugin API 3, bundled with ewe
+opens the home panel. Version **0.5.0**, Plugin API 3, bundled with ewe
 from 0.29.0-beta (opt-in: `default` and `migrate` false). User-facing
 description and honest limits: `README.md`. 0.3.0 (2026-10-15, P2.9) added
 rows under answers and the `browser` and `safe_unlock` do actions; 0.4.0
-(2026-10-17) is Shaun and the bar's material (xray blur, the clip).
+(2026-10-17) is Shaun and the bar's material (xray blur, the clip); 0.5.0
+(2026-10-18, wave 2) adds row icons for downloads, workspaces, timers and
+Bluetooth devices.
 
 ## Files
 
@@ -60,7 +62,10 @@ sections/Actions.qml       quick actions: Do not disturb, game mode, screenshot,
 sections/Messages.qml      the conversation: answers, Undo, Open buttons, proposed commands (Run /
                            In terminal), their output, and rows (a ListWell of ListRows: a click
                            does the first action, small icon buttons the others; `copy` actions
-                           stay in the island: wl-copy)
+                           stay in the island: wl-copy). glyphOf maps a row's `icon` (folder, file,
+                           web, key; wave 2: download, workspace, timer, bluetooth) to a Theme.ic*
+                           glyph, iconOf a secondary button's command (Show in folder → folder,
+                           Cancel → close); an unknown one is a chevron
 sections/Chat.qml          the line you type in, the provider hint, the API key field
 sections/SectionLabel.qml  the overline above a section
 README.md              what it does, settings, honest limits
