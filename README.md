@@ -24,7 +24,9 @@ otherwise; **Super+A** brings it out. It is one size whatever it says:
     opens it. It opens apps the way the launcher does ("open nemo", "open
     kitty in documents"), and it shows a shell command it proposes exactly as
     it will run, with **Run** and **In terminal**: nothing runs without that
-    click.
+    click. An answer from a model appears as it is written (*Claude Code is
+    writing*), and the first letter you type gets the model ready, so the
+    answer starts sooner (0.6.0, with ewe-companion 0.3).
   - what a command found, as a list under its answer: ewe Safe's logins ("copy
     my GitHub password" when several fit: a click copies that one), files
     and folders ("find my resume": **Open**, and small buttons for **Show in
