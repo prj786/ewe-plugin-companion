@@ -190,9 +190,8 @@ Scope {
             root.done(id, true)
             break
         case "open":
-            // a page where the place has pages: a Settings page (Settings
-            // 0.18 opens on Appearance whatever it is asked; the reply names
-            // the page), a Komble page, a Quick settings tab
+            // a page where the place has pages: a Settings page (ewe
+            // Settings opens it since 0.24), a Komble page, a Quick settings tab
             var pg = String(a.page || "")
             var ok = a.what === "settings" ? (Shell.openSettings(pg), true)
                    : a.what === "komble" ? (Shell.openStore(pg), true)
@@ -200,7 +199,8 @@ Scope {
                    : a.what === "overview" ? ((Shell.overviewOpen || Shell.toggleOverview()), true)
                    : a.what === "sync" ? Shell.launch("io.github.prj786.ewe-sync")
                    : a.what === "terminal" ? Shell.launch("kitty")
-                   : a.what === "files" ? Shell.launch("nemo") : false
+                   // ewe Files since ewe 0.44 (Super+E), Nemo before
+                   : a.what === "files" ? (Shell.launch("ewe-files-app") || Shell.launch("nemo")) : false
             CompanionState.dropOpen = false
             root.done(id, ok !== false, ok === false ? "That app is not installed." : "")
             break
@@ -250,6 +250,17 @@ Scope {
             bcli.running = true
             bcliTimeout.restart()
             CompanionState.dropOpen = false
+            break
+        case "app":
+            // one of ewe's own apps with its arguments (0.7): ewe Player
+            // plays files or a link, ewe Files selects a file (--select=…)
+            // or offers Open with. Only these, only as argv, started here
+            // so they belong to the desktop, not to the daemon's unit
+            var appBin = String(a.bin || "").split("/").pop()
+            if (["ewe-player", "ewe-files-app", "ewe-viewer"].indexOf(appBin) < 0) { root.done(id, false, "Not one of ewe's apps."); break }
+            CompanionState.dropOpen = false
+            Quickshell.execDetached([String(a.bin)].concat((a.args || []).map(String)))
+            root.done(id, true)
             break
         case "safe_unlock":
             // Safe's own prompt (`ewe-safe unlock --ask`): the master

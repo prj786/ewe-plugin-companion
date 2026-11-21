@@ -48,6 +48,9 @@ Column {
                 width: Math.min(implicitWidth, ch.width - (undo.visible ? undo.width + Theme.spaceS : 0))
                 anchors.right: msg.mine ? parent.right : undefined
                 text: msg.modelData.text
+                // never rich text: "ewe-player <url>" lost its "<url>", and a
+                // model's or a page's words must not style themselves (C4)
+                textFormat: Text.PlainText
                 wrapMode: Text.Wrap
                 elide: Text.ElideNone
                 horizontalAlignment: msg.mine ? Text.AlignRight : Text.AlignLeft
@@ -173,7 +176,11 @@ Column {
              : a.command === "open_url" ? "web"
              : a.command === "browser_download" && a.args && a.args.action === "show" ? "folder"
              : a.command === "timer_cancel" || a.command === "forget" ? "close"
-             : a.command === "empty_trash" ? "trash" : ""
+             : a.command === "empty_trash" ? "trash"
+             // 0.7: ewe Files, another app, ewe Player
+             : a.command === "show_file" ? "folder"
+             : a.command === "open_with" ? "external"
+             : a.command === "play_local" ? "play" : ""
     }
     function glyphOf(name) {
         switch (name) {
@@ -197,6 +204,13 @@ Column {
         case "network": return Theme.icNetwork
         case "trash": return Theme.icTrash
         case "remember": return Theme.icStar
+        // 0.7: songs, the user's notes, a wiki page, release notes, an app
+        case "music": return Theme.icMusic
+        case "play": return Theme.icPlay
+        case "note": return Theme.icPen
+        case "book": return Theme.icFile
+        case "news": return Theme.icMessage
+        case "external": return Theme.icExternal
         default: return Theme.icChevronRight
         }
     }
@@ -207,6 +221,7 @@ Column {
         width: ch.width
         visible: CompanionState.thinking && CompanionState.streamText !== ""
         text: CompanionState.streamText
+        textFormat: Text.PlainText
         wrapMode: Text.Wrap
         elide: Text.ElideNone
         color: Theme.textPrimary
