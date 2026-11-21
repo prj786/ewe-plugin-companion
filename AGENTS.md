@@ -22,14 +22,23 @@ what is particular to the QML.
 hanging from the top bar's centre. It is
 out while something runs (an agent at work or waiting, a card, a line to
 say, a question in flight, game mode) and gone otherwise; Super+A or a click
-opens the home panel. Version **0.5.1**, Plugin API 3, bundled with ewe
+opens the home panel. Version **0.7.0** (2026-11-21, with ewe-companion 0.3.0, in ewe 0.47), Plugin API 3, bundled with ewe
 from 0.29.0-beta (opt-in: `default` and `migrate` false). User-facing
 description and honest limits: `README.md`. 0.3.0 (2026-10-15, P2.9) added
 rows under answers and the `browser` and `safe_unlock` do actions; 0.4.0
 (2026-10-17) is Shaun and the bar's material (xray blur, the clip); 0.5.0
 (2026-10-18, wave 2) adds row icons for downloads, workspaces, timers and
 Bluetooth devices; 0.5.1 (2026-11-01, the UI revamp) names the apps "ewe +
-Word" (ewe Settings, ewe Safe, ewe Browser) in what the user reads.
+Word" (ewe Settings, ewe Safe, ewe Browser) in what the user reads; 0.6.0
+(2026-11-08, with ewe-companion 0.3) draws an answer as it streams in
+(`hello` `caps: ["partial"]`, `CompanionState.streamText`, one growing
+line under the conversation) and sends `chat.warm` on the first keystroke
+of a question. The next release, 0.7.0 (with ewe-companion 0.3's knowledge
+2.0, 2026-11-21; not bumped in the manifest yet), adds the `do app`
+action (ewe Player, ewe Files or ewe Viewer started with arguments: songs
+or a link, `--select=`, `--open-with=`), row icons for songs, notes, wiki
+pages and release notes, draws answers as plain text (a topic's
+"`<url>`" vanished as rich text), and opens ewe Files for "files".
 
 ## Files
 
@@ -40,12 +49,13 @@ manifest.json          id ewe.companion · apiVersion 3 · kinds service + overl
 qmldir                 the plugin-local singleton CompanionState
 CompanionState.qml     the one truth the service and the notch share: connected, presence, pending
                        cards, sessions, glance, usage, chat status, game mode, the peek, dropOpen,
-                       messages (the last 40), thinking; send() and the helpers that build each
-                       outbound message (answer, jump, run, undo, setKey, runProposal, ask)
+                       messages (the last 40), thinking, streamText (the answer while it streams in);
+                       send() and the helpers that build each outbound message (answer, jump, run,
+                       undo, setKey, runProposal, ask, warm)
 Service.qml            (service) the daemon's socket: reconnect with backoff, start the daemon when
                        nobody answers; onLine() mirrors daemon messages into CompanionState; env (with
                        wayland) and settings out; perform() runs `do` actions (dnd, open, launch, term,
-                       screenshot, browse, browser, safe_unlock); findApp()/startApp() for launching;
+                       screenshot, browse, browser, safe_unlock, app); findApp()/startApp() for launching;
                        the browser's command line (bcli: one process, 25 s at most); the blur rule;
                        IPC ewe.companion
 Drop.qml               (overlay) one Top-layer window per screen: sizing, the reveal, the input mask,
@@ -64,7 +74,8 @@ sections/Messages.qml      the conversation: answers, Undo, Open buttons, propos
                            In terminal), their output, and rows (a ListWell of ListRows: a click
                            does the first action, small icon buttons the others; `copy` actions
                            stay in the island: wl-copy). glyphOf maps a row's `icon` (folder, file,
-                           web, key; wave 2: download, workspace, timer, bluetooth) to a Theme.ic*
+                           web, key; wave 2: download, workspace, timer, bluetooth; 0.7: music, play, note,
+                           book, news, external) to a Theme.ic*
                            glyph, iconOf a secondary button's command (Show in folder → folder,
                            Cancel → close); an unknown one is a chevron
 sections/Chat.qml          the line you type in, the provider hint, the API key field
@@ -206,6 +217,10 @@ The house rules hold (`../ewe-companion/AGENTS.md`); these bite most here:
   clear only your own value.
 - **A plugin property may not be called `right`** (`Item.right` is FINAL;
   the overlay failed to load), and `state` shadows `Item.state`.
+- **`messages` is a JS array:** every assignment makes the Repeater build
+  every delegate again. A streaming answer (twelve pieces a second) must
+  never go through `addMessage`: it is `streamText`, one `TextBody` under
+  the conversation, and the whole answer joins `messages` once.
 - **Layer windows blink when they grow** (above): never bind a window's
   height to its content.
 - **Focus grabs die when an exclusive layer takes the keyboard** (above).
