@@ -181,12 +181,12 @@ Column {
         case "file": return Theme.icFile
         case "web": return Theme.icWeb
         case "key": return Theme.icLock
-        case "copy": return Theme.icClipboard
+        case "copy": return Theme.icCopy
         case "terminal": return Theme.icSsh
         // wave 2: the browser's downloads and workspaces, timers, Bluetooth
         case "download": return Theme.icDownload
         case "workspace": return Theme.icStack
-        case "timer": return Theme.icBellRing
+        case "timer": return Theme.icTimer
         case "bluetooth": return Theme.icBluetooth
         case "close": return Theme.icClose
         // 0.6: what this computer is doing, and what Shaun remembers
