@@ -33,11 +33,14 @@ Word" (ewe Settings, ewe Safe, ewe Browser) in what the user reads; 0.6.0
 (2026-11-08, with ewe-companion 0.3) draws an answer as it streams in
 (`hello` `caps: ["partial"]`, `CompanionState.streamText`, one growing
 line under the conversation) and sends `chat.warm` on the first keystroke
-of a question. The next release, 0.7.0 (with ewe-companion 0.3's knowledge
-2.0, 2026-11-21; not bumped in the manifest yet), adds the `do app`
+of a question. 0.7.0 (released 2026-11-21 with ewe-companion 0.3.0's knowledge
+2.0, vendored in ewe 0.47.0-beta) adds the `do app`
 action (ewe Player, ewe Files or ewe Viewer started with arguments: songs
 or a link, `--select=`, `--open-with=`), row icons for songs, notes, wiki
-pages and release notes, draws answers as plain text (a topic's
+pages and release notes (`music` · `note` · `book` · `news`, sent by the
+daemon, PROTOCOL.md "Rows"; the action buttons' `play` and `external`
+glyphs are the island's own, chosen from the action's command in
+`Messages.qml`), draws answers as plain text (a topic's
 "`<url>`" vanished as rich text), and opens ewe Files for "files".
 
 ## Files
